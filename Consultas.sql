@@ -1,3 +1,4 @@
+-- https://leaf-equinox-58d.notion.site/Resultado-de-reportes-49a2c15fcc2f45c490ce297423e6c5ea
 
 -- =================================================================================
 -- 1. Desplegar para cada elección el país y el partido político que obtuvo mayor
@@ -5,6 +6,10 @@
 -- año de la elección, el país, el nombre del partido político y el porcentaje que
 -- obtuvo de votos en su país.
 -- =================================================================================
+
+SELECT e.name, e.year, c.name, p.name, e.year AS porcentaje 
+    FROM RESULT_DETAIL rd
+    
 
 -- =================================================================================
 -- 2. Desplegar total de votos y porcentaje de votos de mujeres por departamento
