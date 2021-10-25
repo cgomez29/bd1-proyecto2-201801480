@@ -23,14 +23,14 @@ CREATE TABLE TEMPORARY (
     RAZA                VARCHAR(100),
     ANALFABETOS         VARCHAR(100),
     ALFABETOS           VARCHAR(100),
-    -- SEXO VARCHAR(100),
-    -- RAZA VARCHAR(100),
     PRIMARIA            VARCHAR(100),
     NIVEL_MEDIO         VARCHAR(100),
     UNIVERSITARIOS      VARCHAR(100)
 );
 
 SELECT COUNT(*) FROM TEMPORARY;
+
+
 -- ==================================================================================================
 -- Inserting data to the SEX table 
 -- ==================================================================================================
@@ -54,20 +54,29 @@ INSERT COUNTRY (name)
 -- Inserting data to the REGION table 
 -- ==================================================================================================
 
-INSERT REGION (name)
-    SELECT DISTINCT region FROM TEMPORARY;
+INSERT REGION (name, country_id)
+    SELECT DISTINCT region, c.country_id
+        FROM TEMPORARY
+            INNER JOIN COUNTRY c ON c.name = pais;
 
 -- ==================================================================================================
 -- Inserting data to the DEPTO table 
 -- ==================================================================================================
-INSERT DEPTO (name)
-    SELECT DISTINCT depto FROM TEMPORARY;
+INSERT DEPTO (name, region_id)
+    SELECT DISTINCT depto, r.region_id
+        FROM TEMPORARY
+			INNER JOIN COUNTRY c ON c.name = pais
+            INNER JOIN REGION r ON r.name = region AND r.country_id = c.country_id;
 
 -- ==================================================================================================
 -- Inserting data to the TOWN table 
 -- ==================================================================================================
-INSERT TOWN (name)
-    SELECT DISTINCT municipio FROM TEMPORARY;
+INSERT TOWN (name, depto_id)
+    SELECT DISTINCT municipio, d.depto_id
+        FROM TEMPORARY
+			INNER JOIN COUNTRY c ON c.name = pais
+            INNER JOIN REGION r ON r.name = region AND r.country_id = c.country_id
+            INNER JOIN DEPTO d ON d.name = depto AND d.region_id = r.region_id;
 
 -- ==================================================================================================
 -- Inserting data to the ELECTION table 
@@ -79,49 +88,65 @@ INSERT INTO ELECTION(name, year)
 -- Inserting data to the PARTY table 
 -- ==================================================================================================
 INSERT INTO PARTY(party, name)
-    SELECT DISTINCT partido, nombre_partido FROM TEMPORARY;
-
+    SELECT DISTINCT partido, nombre_partido
+        FROM TEMPORARY;
 
 -- ==================================================================================================
 -- Inserting data to the RESULT table 
 -- ==================================================================================================
-INSERT INTO RESULT 
-    SELECT DISTINCT t.analfabetos, 
-                    t.alfabetos, 
-                    t.primaria, 
-                    t.nivel_medio, 
-                    t.universitarios, 
+INSERT INTO RESULT (
+    illiterate,   
+    alphabet,     
+    primary_level,
+    medium_level,
+    academic,     
+    town_id,       
+	election_id,
+    party_id,
+    sex_id,       
+    race_id      
+    )
+  SELECT DISTINCT te.analfabetos, 
+                    te.alfabetos, 
+                    te.primaria, 
+                    te.nivel_medio, 
+                    te.universitarios, 
+                    town_id,       
+                    election_id,  
+                    party_id,
                     s.sex_id,
-                    r.race_id  
-        FROM TEMPORARY t
+                    r.race_id 
+        FROM TEMPORARY te
             INNER JOIN SEX s ON s.name = sexo
-            INNER JOIN RACE r ON r.name = raza;
+            INNER JOIN RACE r ON r.name = raza
+            INNER JOIN ELECTION e ON e.name = nombre_eleccion AND e.year = año_eleccion
+			INNER JOIN PARTY p ON p.name = nombre_partido AND p.party = partido
+            INNER JOIN COUNTRY c ON c.name = pais
+            INNER JOIN REGION re ON re.name = region AND re.country_id = c.country_id
+            INNER JOIN DEPTO d ON d.name = depto AND d.region_id = re.region_id
+            INNER JOIN TOWN t ON t.name = municipio AND t.depto_id = d.depto_id;
+
+
+
+
+
 
 -- ==================================================================================================
 -- Inserting data to the RESULT_DETAIL table 
 -- ==================================================================================================
 
-INSERT INTO RESULT_DETAIL (
-        result_id,       
-        election_id,     
-        party_id,        
-        country_id,      
-        region_id,       
-        depto_id,        
-        town_id         
-    )
-    SELECT DISTINCT rl.result_id,
-                    e.election_id,
-                    p.party_id,
-                    c.country_id,
-                    r.region_id,
-                    d.depto_id,
-                    t.town_id 
-        FROM TEMPORARY
-            INNER JOIN RESULT rl ON rl.illiterate = analfabetos AND rl.alphabet = alfabetos AND rl.primary_level = primaria
-            INNER JOIN ELECTION e ON e.name = nombre_eleccion AND e.year = año_eleccion
-            INNER JOIN PARTY p ON p.party = partido AND p.name = nombre_partido
-            INNER JOIN COUNTRY c ON c.name = pais  
-            INNER JOIN REGION r ON r.name = region
-            INNER JOIN DEPTO d ON d.name = depto
-            INNER JOIN TOWN t ON t.name = municipio;
+-- INSERT INTO RESULT_DETAIL (
+--         result_id,       
+--         election_id,     
+--         town_id          
+--     )
+--     SELECT DISTINCT rl.result_id,
+--                     e.election_id,
+--                     t.town_id 
+--         FROM TEMPORARY
+--             INNER JOIN RESULT rl ON rl.illiterate = analfabetos AND rl.alphabet = alfabetos AND rl.primary_level = primaria
+--             INNER JOIN ELECTION e ON e.name = nombre_eleccion AND e.year = año_eleccion
+--             INNER JOIN COUNTRY c ON c.name = pais
+--             INNER JOIN REGION r ON r.name = region AND r.country_id = c.country_id
+--             INNER JOIN DEPTO d ON d.name = depto AND d.region_id = r.region_id
+--             INNER JOIN TOWN t ON t.name = municipio AND t.depto_id = d.depto_id;
