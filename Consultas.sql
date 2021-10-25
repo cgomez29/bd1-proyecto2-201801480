@@ -12,8 +12,8 @@ SELECT eleccion, year, pais, partido, ((porpartido.por_partido*100/total)) FROM 
 	SELECT eleccion, year, pais, SUM(votos) AS total FROM (
 		SELECT (r.illiterate + r.alphabet) as votos, e.name AS eleccion, e.year, p.name as partido, c.name as pais
 			FROM RESULT r
-			INNER JOIN ELECTION e ON e.election_id = r.election_id 
 			INNER JOIN PARTY p ON p.party_id = r.party_id
+			INNER JOIN ELECTION e ON p.election_id = e.election_id 
 			INNER JOIN TOWN t ON t.town_id = r.town_id
 			INNER JOIN DEPTO d ON d.depto_id = t.depto_id
 			INNER JOIN REGION re ON re.region_id = d.region_id
@@ -24,8 +24,8 @@ SELECT eleccion, year, pais, partido, ((porpartido.por_partido*100/total)) FROM 
 		SELECT SUM(votos) AS por_partido, pais AS pais2, partido FROM (
 			SELECT (r.illiterate + r.alphabet) as votos, e.name AS eleccion, e.year, p.name as partido, c.name as pais
 				FROM RESULT r
-				INNER JOIN ELECTION e ON e.election_id = r.election_id 
 				INNER JOIN PARTY p ON p.party_id = r.party_id
+                INNER JOIN ELECTION e ON p.election_id = e.election_id 
 				INNER JOIN TOWN t ON t.town_id = r.town_id
 				INNER JOIN DEPTO d ON d.depto_id = t.depto_id
 				INNER JOIN REGION re ON re.region_id = d.region_id
@@ -34,10 +34,12 @@ SELECT eleccion, year, pais, partido, ((porpartido.por_partido*100/total)) FROM 
     ) AS porpartido ON porpartido.pais2 = totales.pais; 
         
  
- select * from party;
- select * from election;
- select * from country;
-  select * from town;
+select * from party;
+select * from election;
+select * from country;
+select count(*) from town;
+ 
+ select count(*) from result;
  
 select c.name, r.name, d.name, t.name from toWn t
 	INNER JOIN DEPTO d ON d.depto_id = t.depto_id 
@@ -50,33 +52,34 @@ select c.name, r.name, d.name, t.name from toWn t
 -- y país. El ciento por ciento es el total de votos de mujeres por país. (Tip:
 -- Todos los porcentajes por departamento de un país deben sumar el 100%)
 -- =================================================================================
-
-SELECT pais, departamento, SUM(votos) AS total FROM (
+SELECT pais, departamento, pordepa, ((pordepa*100)/total) FROM (
+	SELECT pais, departamento, SUM(votos) AS pordepa FROM (
 		SELECT (r.illiterate + r.alphabet) as votos, d.name AS departamento, c.name as pais
 			FROM RESULT r
-			INNER JOIN ELECTION e ON e.election_id = r.election_id 
 			INNER JOIN PARTY p ON p.party_id = r.party_id
+			INNER JOIN ELECTION e ON p.election_id = e.election_id 
 			INNER JOIN TOWN t ON t.town_id = r.town_id
 			INNER JOIN DEPTO d ON d.depto_id = t.depto_id
 			INNER JOIN REGION re ON re.region_id = d.region_id
 			INNER JOIN COUNTRY c ON c.country_id = re.country_id 
             INNER JOIN SEX s ON s.sex_id = r.sex_id 
             WHERE s.name = 'mujeres'
-	) AS detail_p GROUP BY pais, departamento;
-
-
-SELECT pais, SUM(votos) AS total FROM (
-		SELECT (r.illiterate + r.alphabet) as votos, d.name AS departamento, c.name as pais
-			FROM RESULT r
-			INNER JOIN ELECTION e ON e.election_id = r.election_id 
-			INNER JOIN PARTY p ON p.party_id = r.party_id
-			INNER JOIN TOWN t ON t.town_id = r.town_id
-			INNER JOIN DEPTO d ON d.depto_id = t.depto_id
-			INNER JOIN REGION re ON re.region_id = d.region_id
-			INNER JOIN COUNTRY c ON c.country_id = re.country_id 
-            INNER JOIN SEX s ON s.sex_id = r.sex_id 
-            WHERE s.name = 'mujeres'
-	) AS detail_p GROUP BY pais;
+	) AS detail_p GROUP BY pais, departamento
+) AS consulta1 
+	INNER JOIN (
+		SELECT pais AS pais2, SUM(votos) AS total FROM (
+			SELECT (r.illiterate + r.alphabet) as votos, d.name AS departamento, c.name as pais
+				FROM RESULT r
+				INNER JOIN PARTY p ON p.party_id = r.party_id
+				INNER JOIN ELECTION e ON p.election_id = e.election_id 
+				INNER JOIN TOWN t ON t.town_id = r.town_id
+				INNER JOIN DEPTO d ON d.depto_id = t.depto_id
+				INNER JOIN REGION re ON re.region_id = d.region_id
+				INNER JOIN COUNTRY c ON c.country_id = re.country_id 
+				INNER JOIN SEX s ON s.sex_id = r.sex_id 
+				WHERE s.name = 'mujeres'
+		) AS detail_p GROUP BY pais
+    ) AS consulta2 ON pais = pais2 ;
 
 
 -- =================================================================================
@@ -85,23 +88,42 @@ SELECT pais, SUM(votos) AS total FROM (
 -- =================================================================================
 
 
+
 -- =================================================================================
 -- 4. Desplegar todas las regiones por país en las que predomina la raza indígena.
 -- Es decir, hay más votos que las otras razas.
 -- =================================================================================
 
-SELECT pais, region, SUM(votos) AS total FROM (
-		SELECT (r.illiterate + r.alphabet) as votos, re.name AS region, c.name as pais
-			FROM RESULT r
-			INNER JOIN ELECTION e ON e.election_id = r.election_id 
+SELECT pais, region, total FROM (
+	SELECT SUM(r.illiterate + r.alphabet) as total, re.name AS region, c.name as pais, ra.name AS raza
+		FROM RESULT r
 			INNER JOIN PARTY p ON p.party_id = r.party_id
+			INNER JOIN ELECTION e ON p.election_id = e.election_id 
 			INNER JOIN TOWN t ON t.town_id = r.town_id
 			INNER JOIN DEPTO d ON d.depto_id = t.depto_id
 			INNER JOIN REGION re ON re.region_id = d.region_id
 			INNER JOIN COUNTRY c ON c.country_id = re.country_id 
-            INNER JOIN RACE ra ON ra.race_id = r.race_id 
-            WHERE ra.name = 'INDIGENAS'
-	) AS detail_p GROUP BY pais, region;
+			INNER JOIN RACE ra ON ra.race_id = r.race_id 
+				GROUP BY c.name, re.name, ra.name
+				ORDER BY total DESC
+) AS todos 
+	INNER JOIN (
+		SELECT pais AS pais2, region AS region2, MAX(total) AS maximo FROM (
+			SELECT SUM(r.illiterate + r.alphabet) as total, re.name AS region, c.name as pais, ra.name AS raza
+				FROM RESULT r
+					INNER JOIN PARTY p ON p.party_id = r.party_id
+					INNER JOIN ELECTION e ON p.election_id = e.election_id 
+					INNER JOIN TOWN t ON t.town_id = r.town_id
+					INNER JOIN DEPTO d ON d.depto_id = t.depto_id
+					INNER JOIN REGION re ON re.region_id = d.region_id
+					INNER JOIN COUNTRY c ON c.country_id = re.country_id 
+					INNER JOIN RACE ra ON ra.race_id = r.race_id 
+						GROUP BY c.name, re.name, ra.name
+						ORDER BY total DESC
+		) AS tmax GROUP BY pais, region
+    ) AS maximos ON pais2 = pais AND region2 = region AND maximo = total
+		WHERE raza = 'INDIGENAS';
+
 
 -- =================================================================================
 -- 5. Desplegar el nombre del país, el departamento, el municipio y la cantidad de
@@ -110,6 +132,18 @@ SELECT pais, region, SUM(votos) AS total FROM (
 -- que el 30% de votos de nivel medio. Ordene sus resultados de mayor a
 -- menor.
 -- =================================================================================
+	SELECT SUM(r.illiterate + r.alphabet) as total, re.name AS region, c.name as pais, ra.name AS raza
+		FROM RESULT r
+			INNER JOIN PARTY p ON p.party_id = r.party_id
+			INNER JOIN ELECTION e ON p.election_id = e.election_id 
+			INNER JOIN TOWN t ON t.town_id = r.town_id
+			INNER JOIN DEPTO d ON d.depto_id = t.depto_id
+			INNER JOIN REGION re ON re.region_id = d.region_id
+			INNER JOIN COUNTRY c ON c.country_id = re.country_id 
+			INNER JOIN RACE ra ON ra.race_id = r.race_id 
+				GROUP BY c.name, re.name, ra.name
+				ORDER BY total DESC;
+
 
 -- =================================================================================
 -- 6. Desplegar el porcentaje de mujeres universitarias y hombres universitarios

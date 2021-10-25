@@ -87,9 +87,10 @@ INSERT INTO ELECTION(name, year)
 -- ==================================================================================================
 -- Inserting data to the PARTY table 
 -- ==================================================================================================
-INSERT INTO PARTY(party, name)
-    SELECT DISTINCT partido, nombre_partido
-        FROM TEMPORARY;
+INSERT INTO PARTY(party, name, election_id)
+	SELECT DISTINCT partido, nombre_partido, e.election_id
+		FROM TEMPORARY
+			INNER JOIN ELECTION e ON e.name = nombre_eleccion AND e.year = año_eleccion;
 
 -- ==================================================================================================
 -- Inserting data to the RESULT table 
@@ -101,7 +102,7 @@ INSERT INTO RESULT (
     medium_level,
     academic,     
     town_id,       
-	election_id,
+	-- election_id,
     party_id,
     sex_id,       
     race_id      
@@ -112,7 +113,7 @@ INSERT INTO RESULT (
                     te.nivel_medio, 
                     te.universitarios, 
                     town_id,       
-                    election_id,  
+                    -- election_id,  
                     party_id,
                     s.sex_id,
                     r.race_id 
