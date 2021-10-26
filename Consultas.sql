@@ -265,17 +265,27 @@ SELECT pais, ((total_analf*100)/totalA) FROM (
 -- han votado mayor porcentaje de analfabetas. (tip: solo desplegar un nombre
 -- de país, el de mayor porcentaje).
 -- =================================================================================
--- TODO: NO DA 
-SELECT c.name AS Pais, SUM(r.illiterate) AS totalGuate
-	FROM RESULT r
-		INNER JOIN TOWN t ON t.town_id = r.town_id
-		INNER JOIN DEPTO d ON d.depto_id = t.depto_id
-		INNER JOIN REGION re ON re.region_id = d.region_id
-		INNER JOIN COUNTRY c ON c.country_id = re.country_id 
-			GROUP BY c.name
-				ORDER BY totalGuate DESC;
 
-SELECT SUM(r.illiterate) FROM RESULT r;
+SELECT pais, ((analfabetas*100)/total) AS porcentaje_analfabetas FROM (
+	SELECT c.name AS pais, SUM(r.illiterate) AS analfabetas
+		FROM RESULT r
+			INNER JOIN TOWN t ON t.town_id = r.town_id
+			INNER JOIN DEPTO d ON d.depto_id = t.depto_id
+			INNER JOIN REGION re ON re.region_id = d.region_id
+			INNER JOIN COUNTRY c ON c.country_id = re.country_id 
+				GROUP BY c.name
+					ORDER BY analfabetas DESC LIMIT 1
+) AS consulta1 
+	INNER JOIN (
+		SELECT c.name AS pais2, SUM(r.illiterate+r.alphabet) AS total
+			FROM RESULT r
+				INNER JOIN TOWN t ON t.town_id = r.town_id
+				INNER JOIN DEPTO d ON d.depto_id = t.depto_id
+				INNER JOIN REGION re ON re.region_id = d.region_id
+				INNER JOIN COUNTRY c ON c.country_id = re.country_id 
+					GROUP BY c.name
+						ORDER BY total DESC
+    ) AS consulta2 ON pais = pais2;
 
 -- =================================================================================
 -- 13.Desplegar la lista de departamentos de Guatemala y número de votos
