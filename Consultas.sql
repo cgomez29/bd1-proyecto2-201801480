@@ -232,11 +232,50 @@ SELECT pais, raza, ((por_raza*100)/total ) AS votos_por_raza FROM (
 -- indígenas alfabetas.
 -- =================================================================================
 
+SELECT pais, ((total_analf*100)/totalA) FROM (
+	SELECT  c.name as pais, SUM(r.alphabet) as total_analf
+		FROM RESULT r
+			INNER JOIN TOWN t ON t.town_id = r.town_id
+			INNER JOIN DEPTO d ON d.depto_id = t.depto_id
+			INNER JOIN REGION re ON re.region_id = d.region_id
+			INNER JOIN COUNTRY c ON c.country_id = re.country_id 
+			INNER JOIN RACE ra ON ra.race_id = r.race_id 
+			INNER JOIN SEX s ON s.sex_id = r.sex_id 
+				WHERE s.name = 'mujeres' AND ra.name = 'INDIGENAS'
+				GROUP BY c.name
+					ORDER BY total_analf DESC
+
+) AS consulta1 
+	INNER JOIN (
+		SELECT  c.name as pais2, SUM(r.alphabet + illiterate) as totalA
+			FROM RESULT r
+				INNER JOIN TOWN t ON t.town_id = r.town_id
+				INNER JOIN DEPTO d ON d.depto_id = t.depto_id
+				INNER JOIN REGION re ON re.region_id = d.region_id
+				INNER JOIN COUNTRY c ON c.country_id = re.country_id 
+				INNER JOIN RACE ra ON ra.race_id = r.race_id 
+				INNER JOIN SEX s ON s.sex_id = r.sex_id 
+					GROUP BY c.name
+						ORDER BY totalA DESC
+    ) AS consulta2 ON pais2 = pais;
+
+
 -- =================================================================================
 -- 12.Desplegar el nombre del país, el porcentaje de votos de ese país en el que
 -- han votado mayor porcentaje de analfabetas. (tip: solo desplegar un nombre
 -- de país, el de mayor porcentaje).
 -- =================================================================================
+-- TODO: NO DA 
+SELECT c.name AS Pais, SUM(r.illiterate) AS totalGuate
+	FROM RESULT r
+		INNER JOIN TOWN t ON t.town_id = r.town_id
+		INNER JOIN DEPTO d ON d.depto_id = t.depto_id
+		INNER JOIN REGION re ON re.region_id = d.region_id
+		INNER JOIN COUNTRY c ON c.country_id = re.country_id 
+			GROUP BY c.name
+				ORDER BY totalGuate DESC;
+
+SELECT SUM(r.illiterate) FROM RESULT r;
 
 -- =================================================================================
 -- 13.Desplegar la lista de departamentos de Guatemala y número de votos
