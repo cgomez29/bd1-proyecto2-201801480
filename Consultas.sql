@@ -158,6 +158,20 @@ SELECT pais, region, total FROM (
 -- departamentos de la región).
 -- =================================================================================
 
+
+	SELECT  c.name as pais, re.name AS region, d.name AS departamento, SUM(r.illiterate + r.alphabet) as total
+		FROM RESULT r
+			INNER JOIN PARTY p ON p.party_id = r.party_id
+			INNER JOIN ELECTION e ON p.election_id = e.election_id 
+			INNER JOIN TOWN t ON t.town_id = r.town_id
+			INNER JOIN DEPTO d ON d.depto_id = t.depto_id
+			INNER JOIN REGION re ON re.region_id = d.region_id
+			INNER JOIN COUNTRY c ON c.country_id = re.country_id 
+			INNER JOIN RACE ra ON ra.race_id = r.race_id 
+				GROUP BY c.name, re.name, ra.name
+				ORDER BY total DESC;
+
+
 -- =================================================================================
 -- 8. Desplegar el total de votos de cada nivel de escolaridad (primario, medio,
 -- universitario) por país, sin importar raza o sexo.
@@ -201,8 +215,17 @@ SELECT pais, raza, ((por_raza*100)/total ) AS votos_por_raza FROM (
 -- votos.
 -- =================================================================================
 
-
--- TODO: AQUI
+	SELECT  c.name as pais, e.name AS election, e.year, t.name, p.name, SUM(r.illiterate + r.alphabet) as total
+		FROM RESULT r
+			INNER JOIN PARTY p ON p.party_id = r.party_id
+			INNER JOIN ELECTION e ON p.election_id = e.election_id 
+			INNER JOIN TOWN t ON t.town_id = r.town_id
+			INNER JOIN DEPTO d ON d.depto_id = t.depto_id
+			INNER JOIN REGION re ON re.region_id = d.region_id
+			INNER JOIN COUNTRY c ON c.country_id = re.country_id 
+			INNER JOIN RACE ra ON ra.race_id = r.race_id 
+				GROUP BY c.name, e.name, p.name, e.year, t.name, p.name
+				ORDER BY total DESC;
 
 -- =================================================================================
 -- 11. Desplegar el total de votos y el porcentaje de votos emitidos por mujeres
@@ -220,3 +243,26 @@ SELECT pais, raza, ((por_raza*100)/total ) AS votos_por_raza FROM (
 -- obtenidos, para los departamentos que obtuvieron más votos que el
 -- departamento de Guatemala.
 -- =================================================================================
+
+	SELECT  c.name as pais, d.name, SUM(r.illiterate + r.alphabet) as total
+		FROM RESULT r
+			INNER JOIN TOWN t ON t.town_id = r.town_id
+			INNER JOIN DEPTO d ON d.depto_id = t.depto_id
+			INNER JOIN REGION re ON re.region_id = d.region_id
+			INNER JOIN COUNTRY c ON c.country_id = re.country_id 
+				WHERE c.name = 'GUATEMALA' 
+					GROUP BY c.name, d.name
+						HAVING total > (
+							SELECT SUM(r.illiterate + r.alphabet) AS totalGuate
+								FROM RESULT r
+									INNER JOIN TOWN t ON t.town_id = r.town_id
+									INNER JOIN DEPTO d ON d.depto_id = t.depto_id
+									INNER JOIN REGION re ON re.region_id = d.region_id
+									INNER JOIN COUNTRY c ON c.country_id = re.country_id 
+										WHERE c.name = 'GUATEMALA' AND d.name = 'Guatemala'
+											GROUP BY c.name, d.name
+												ORDER BY totalGuate DESC
+						) 
+						ORDER BY total DESC;
+
+
