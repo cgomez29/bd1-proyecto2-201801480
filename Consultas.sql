@@ -133,8 +133,6 @@ SELECT pais, region, total FROM (
 -- menor.
 -- =================================================================================
 
--- TODO: FALTA
-
 SELECT pais, departamento, municipio, (uni*100/total) AS luni, (primario*100/total) AS lprimario, (medio*100/total) AS lmedio FROM (
 	SELECT 	c.name AS pais, d.name AS departamento, t.name AS municipio, SUM(r.academic) as uni,
 			SUM(r.primary_level) as primario, SUM(r.medium_level) as medio
@@ -197,7 +195,7 @@ SELECT departamento, universitarios, ((individual*100)/total) AS porcentaje FROM
 -- departamentos de la región).
 -- =================================================================================
 
--- TODO: FALTA
+SELECT  pais, region, AVG(total) AS promedio FROM (
 	SELECT  c.name as pais, re.name AS region, d.name AS departamento, SUM(r.illiterate + r.alphabet) as total
 		FROM RESULT r
 			INNER JOIN PARTY p ON p.party_id = r.party_id
@@ -207,9 +205,9 @@ SELECT departamento, universitarios, ((individual*100)/total) AS porcentaje FROM
 			INNER JOIN REGION re ON re.region_id = d.region_id
 			INNER JOIN COUNTRY c ON c.country_id = re.country_id 
 			INNER JOIN RACE ra ON ra.race_id = r.race_id 
-				GROUP BY c.name, re.name, ra.name
-				ORDER BY total DESC;
-
+				GROUP BY c.name, re.name, d.name
+) AS consulta1
+	GROUP BY pais, region;
 
 -- =================================================================================
 -- 8. Desplegar el total de votos de cada nivel de escolaridad (primario, medio,
