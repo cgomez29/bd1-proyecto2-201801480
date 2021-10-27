@@ -213,7 +213,6 @@ SELECT  pais, region, AVG(total) AS promedio FROM (
 -- 8. Desplegar el total de votos de cada nivel de escolaridad (primario, medio,
 -- universitario) por país, sin importar raza o sexo.
 -- =================================================================================
--- TODO: NO SE SI ESTA BIEN
 
 SELECT 	c.name as pais, 
 		SUM(r.primary_level) AS primario, 
@@ -225,6 +224,7 @@ SELECT 	c.name as pais,
 		INNER JOIN REGION re ON re.region_id = d.region_id
 		INNER JOIN COUNTRY c ON c.country_id = re.country_id 
 			GROUP BY c.name;
+
 
 -- =================================================================================
 -- 9. Desplegar el nombre del país y el porcentaje de votos por raza.
