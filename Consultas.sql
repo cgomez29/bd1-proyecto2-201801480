@@ -266,8 +266,6 @@ SELECT pais, raza, ((por_raza*100)/total ) AS votos_por_raza FROM (
 	SELECT pais, raza, SUM(votos) AS por_raza FROM (
 		SELECT (r.illiterate + r.alphabet) as votos, ra.name AS raza, c.name as pais
 			FROM RESULT r
-			INNER JOIN ELECTION e ON e.election_id = r.election_id 
-			INNER JOIN PARTY p ON p.party_id = r.party_id
 			INNER JOIN TOWN t ON t.town_id = r.town_id
 			INNER JOIN DEPTO d ON d.depto_id = t.depto_id
 			INNER JOIN REGION re ON re.region_id = d.region_id
@@ -279,8 +277,6 @@ SELECT pais, raza, ((por_raza*100)/total ) AS votos_por_raza FROM (
 			SELECT pais AS pais2, SUM(votos) AS total FROM (
 				SELECT (r.illiterate + r.alphabet) as votos, ra.name AS raza, c.name as pais
 					FROM RESULT r
-					INNER JOIN ELECTION e ON e.election_id = r.election_id 
-					INNER JOIN PARTY p ON p.party_id = r.party_id
 					INNER JOIN TOWN t ON t.town_id = r.town_id
 					INNER JOIN DEPTO d ON d.depto_id = t.depto_id
 					INNER JOIN REGION re ON re.region_id = d.region_id
@@ -295,11 +291,10 @@ SELECT pais, raza, ((por_raza*100)/total ) AS votos_por_raza FROM (
 -- de votos entre el partido que obtuvo más votos y el partido que obtuvo menos
 -- votos.
 -- =================================================================================
--- TODO: FALTA
 
 CREATE OR REPLACE VIEW consulta10_pais_votos_desc
 	AS
-	SELECT  c.name as pais, e.name AS election, e.year, d.name AS departamento, p.name AS partido, SUM(r.illiterate + r.alphabet) as total
+	SELECT  c.name as pais, SUM(r.illiterate + r.alphabet) as total
 		FROM RESULT r
 			INNER JOIN PARTY p ON p.party_id = r.party_id
 			INNER JOIN ELECTION e ON p.election_id = e.election_id 
@@ -307,33 +302,17 @@ CREATE OR REPLACE VIEW consulta10_pais_votos_desc
 			INNER JOIN DEPTO d ON d.depto_id = t.depto_id
 			INNER JOIN REGION re ON re.region_id = d.region_id
 			INNER JOIN COUNTRY c ON c.country_id = re.country_id 
-				GROUP BY c.name, e.name, p.name, e.year, d.name, p.name
-					ORDER BY c.name, total DESC;
-                    
-CREATE OR REPLACE VIEW consulta10_pais_votos_asc
-	AS
-	SELECT  c.name as pais, e.name AS election, e.year, d.name AS departamento, p.name AS partido, SUM(r.illiterate + r.alphabet) as total
-		FROM RESULT r
-			INNER JOIN PARTY p ON p.party_id = r.party_id
-			INNER JOIN ELECTION e ON p.election_id = e.election_id 
-			INNER JOIN TOWN t ON t.town_id = r.town_id
-			INNER JOIN DEPTO d ON d.depto_id = t.depto_id
-			INNER JOIN REGION re ON re.region_id = d.region_id
-			INNER JOIN COUNTRY c ON c.country_id = re.country_id 
-				GROUP BY c.name, e.name, p.name, e.year, d.name, p.name
-					ORDER BY c.name, total ASC;
+				GROUP BY c.name, p.name;
 
-SELECT * FROM consulta10_pais_votos_asc;
-
-SELECT pais, MAX(total) OVER (PARTITION BY pais, election, year, partido) 
+SELECT pais, (maximo - menor) AS diferencia FROM (
+	SELECT	pais,
+		total,
+        MAX(total) OVER (PARTITION BY pais) AS maximo,
+        MIN(total) OVER (PARTITION BY pais) AS menor
 	FROM consulta10_pais_votos_desc
-    GROUP BY pais;
-    
+) AS consulta1
+	ORDER BY diferencia ASC LIMIT 1;
 
-SELECT pais, MIN(total) OVER (PARTITION BY pais, election, year, partido) 
-	FROM consulta10_pais_votos_asc
-    GROUP BY pais;
-    
 -- =================================================================================
 -- 11. Desplegar el total de votos y el porcentaje de votos emitidos por mujeres
 -- indígenas alfabetas.
