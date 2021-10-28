@@ -86,9 +86,36 @@ SELECT pais, departamento, pordepa, ((pordepa*100)/total) FROM (
 -- 3. Desplegar el nombre del país, nombre del partido político y número de
 -- alcaldías de los partidos políticos que ganaron más alcaldías por país.
 -- =================================================================================
+CREATE OR REPLACE VIEW v_consulta3_maximo 
+	AS
+	SELECT pais, municipio, partido, total, (MAX(total) OVER (PARTITION BY pais, municipio)) AS maximo  FROM (
+		SELECT  c.name as pais, re.name as region, d.name as depto, t.name AS municipio, p.name AS partido, SUM(r.illiterate + r.alphabet) AS total
+			FROM RESULT r
+				INNER JOIN PARTY p ON p.party_id = r.party_id
+				INNER JOIN TOWN t ON t.town_id = r.town_id
+				INNER JOIN DEPTO d ON d.depto_id = t.depto_id
+				INNER JOIN REGION re ON re.region_id = d.region_id
+				INNER JOIN COUNTRY c ON c.country_id = re.country_id 
+					GROUP BY c.name, re.name, d.name, t.name, p.name
+	) AS consulta1
+		ORDER BY pais, maximo DESC;
 
--- TODO: FALTA
+SELECT pais, partido, cantidad, maxi FROM (
+	SELECT pais, partido, cantidad, (MAX(cantidad) OVER ( PARTITION BY pais)) AS maxi FROM (
+		SELECT pais, partido, COUNT(partido) AS cantidad
+		FROM (
+			SELECT pais, municipio, partido, total, maximo
+				FROM v_consulta3_maximo
+					GROUP BY pais, municipio, partido, total
+						HAVING total = maximo
+		) AS maximos 
+			GROUP BY pais, partido
+	) AS consulta1
+) AS consulta2
+	GROUP BY pais, partido
+		HAVING cantidad = maxi;
 
+        
 -- =================================================================================
 -- 4. Desplegar todas las regiones por país en las que predomina la raza indígena.
 -- Es decir, hay más votos que las otras razas.
@@ -264,7 +291,10 @@ SELECT pais, raza, ((por_raza*100)/total ) AS votos_por_raza FROM (
 -- votos.
 -- =================================================================================
 -- TODO: FALTA
-	SELECT  c.name as pais, e.name AS election, e.year, t.name, p.name, SUM(r.illiterate + r.alphabet) as total
+
+CREATE OR REPLACE VIEW consulta10_pais_votos_desc
+	AS
+	SELECT  c.name as pais, e.name AS election, e.year, d.name AS departamento, p.name AS partido, SUM(r.illiterate + r.alphabet) as total
 		FROM RESULT r
 			INNER JOIN PARTY p ON p.party_id = r.party_id
 			INNER JOIN ELECTION e ON p.election_id = e.election_id 
@@ -272,10 +302,33 @@ SELECT pais, raza, ((por_raza*100)/total ) AS votos_por_raza FROM (
 			INNER JOIN DEPTO d ON d.depto_id = t.depto_id
 			INNER JOIN REGION re ON re.region_id = d.region_id
 			INNER JOIN COUNTRY c ON c.country_id = re.country_id 
-			INNER JOIN RACE ra ON ra.race_id = r.race_id 
-				GROUP BY c.name, e.name, p.name, e.year, t.name, p.name
-				ORDER BY total DESC;
+				GROUP BY c.name, e.name, p.name, e.year, d.name, p.name
+					ORDER BY c.name, total DESC;
+                    
+CREATE OR REPLACE VIEW consulta10_pais_votos_asc
+	AS
+	SELECT  c.name as pais, e.name AS election, e.year, d.name AS departamento, p.name AS partido, SUM(r.illiterate + r.alphabet) as total
+		FROM RESULT r
+			INNER JOIN PARTY p ON p.party_id = r.party_id
+			INNER JOIN ELECTION e ON p.election_id = e.election_id 
+			INNER JOIN TOWN t ON t.town_id = r.town_id
+			INNER JOIN DEPTO d ON d.depto_id = t.depto_id
+			INNER JOIN REGION re ON re.region_id = d.region_id
+			INNER JOIN COUNTRY c ON c.country_id = re.country_id 
+				GROUP BY c.name, e.name, p.name, e.year, d.name, p.name
+					ORDER BY c.name, total ASC;
 
+SELECT * FROM consulta10_pais_votos_asc;
+
+SELECT pais, MAX(total) OVER (PARTITION BY pais, election, year, partido) 
+	FROM consulta10_pais_votos_desc
+    GROUP BY pais;
+    
+
+SELECT pais, MIN(total) OVER (PARTITION BY pais, election, year, partido) 
+	FROM consulta10_pais_votos_asc
+    GROUP BY pais;
+    
 -- =================================================================================
 -- 11. Desplegar el total de votos y el porcentaje de votos emitidos por mujeres
 -- indígenas alfabetas.
