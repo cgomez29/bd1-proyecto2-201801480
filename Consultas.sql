@@ -32,20 +32,7 @@ SELECT eleccion, year, pais, partido, ((porpartido.por_partido*100/total)) FROM 
 				INNER JOIN COUNTRY c ON c.country_id = re.country_id 
 		) AS detail_p GROUP BY pais, partido
     ) AS porpartido ON porpartido.pais2 = totales.pais; 
-        
- 
-select * from party;
-select * from election;
-select * from country;
-select count(*) from town;
- 
- select count(*) from result;
- 
-select c.name, r.name, d.name, t.name from toWn t
-	INNER JOIN DEPTO d ON d.depto_id = t.depto_id 
-    INNER JOIN REGION r ON r.region_id = d.region_id 
-	INNER JOIN COUNTRY c ON c.country_id = r.country_id ;
-   
+
  
 -- =================================================================================
 -- 2. Desplegar total de votos y porcentaje de votos de mujeres por departamento
@@ -191,30 +178,48 @@ SELECT pais, departamento, municipio, (uni*100/total) AS luni, (primario*100/tot
 -- que votaron por departamento, donde las mujeres universitarias que votaron
 -- fueron más que los hombres universitarios que votaron.
 -- =================================================================================
--- TODO: FALTA : mostrar solo los departamentos en donde las mujeres tenga mayor porcentaje 
 
-SELECT departamento, universitarios, ((individual*100)/total) AS porcentaje FROM (
-	SELECT c.name AS pais, d.name AS departamento, s.name AS universitarios, SUM(r.academic) AS individual
-		FROM RESULT r
-			INNER JOIN TOWN t ON t.town_id = r.town_id
-			INNER JOIN DEPTO d ON d.depto_id = t.depto_id
-			INNER JOIN REGION re ON re.region_id = d.region_id
-			INNER JOIN COUNTRY c ON c.country_id = re.country_id 
-			INNER JOIN SEX s ON s.sex_id = r.sex_id 
-				GROUP BY c.name, d.name, s.name
-) AS consulta1 
-	INNER JOIN (
-		SELECT c.name AS pais2, d.name AS departamento2, SUM(r.academic) AS total
+CREATE OR REPLACE VIEW v_consulta6_porcentaje_universitarios
+	AS
+	SELECT departamento, universitarios, ((individual*100)/total) AS porcentaje FROM (
+		SELECT c.name AS pais, d.name AS departamento, s.name AS universitarios, SUM(r.academic) AS individual
 			FROM RESULT r
 				INNER JOIN TOWN t ON t.town_id = r.town_id
 				INNER JOIN DEPTO d ON d.depto_id = t.depto_id
 				INNER JOIN REGION re ON re.region_id = d.region_id
 				INNER JOIN COUNTRY c ON c.country_id = re.country_id 
 				INNER JOIN SEX s ON s.sex_id = r.sex_id 
-					GROUP BY c.name, d.name
-    ) AS consulta2 ON pais2 = pais AND departamento = departamento2
-		ORDER BY departamento, porcentaje DESC;
-        
+					GROUP BY c.name, d.name, s.name
+	) AS consulta1 
+		INNER JOIN (
+			SELECT c.name AS pais2, d.name AS departamento2, SUM(r.academic) AS total
+				FROM RESULT r
+					INNER JOIN TOWN t ON t.town_id = r.town_id
+					INNER JOIN DEPTO d ON d.depto_id = t.depto_id
+					INNER JOIN REGION re ON re.region_id = d.region_id
+					INNER JOIN COUNTRY c ON c.country_id = re.country_id 
+					INNER JOIN SEX s ON s.sex_id = r.sex_id 
+						GROUP BY c.name, d.name
+		) AS consulta2 ON pais2 = pais AND departamento = departamento2
+			ORDER BY departamento, porcentaje DESC;
+            
+SELECT depto, mporcentaje AS Universitarias, hporcentaje AS Universitarios 
+	FROM (
+		SELECT departamento AS depto, universitarios AS mujeres, porcentaje AS mporcentaje
+			FROM v_consulta6_porcentaje_universitarios
+				WHERE universitarios = 'mujeres'
+    ) AS consulta1 
+		INNER JOIN (
+			SELECT departamento as depto2, universitarios AS hombres, porcentaje AS hporcentaje
+				FROM v_consulta6_porcentaje_universitarios
+					WHERE universitarios = 'hombres'
+        ) AS consulta2 
+			ON depto = depto2
+				WHERE mporcentaje > hporcentaje
+                 ORDER BY depto, mporcentaje DESC;
+
+
+
 -- =================================================================================
 -- 7. Desplegar el nombre del país, la región y el promedio de votos por
 -- departamento. Por ejemplo: si la región tiene tres departamentos, se debe
