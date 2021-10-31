@@ -126,4 +126,15 @@ INSERT INTO RESULT (
             INNER JOIN REGION re ON re.name = region AND re.country_id = c.country_id
             INNER JOIN DEPTO d ON d.name = depto AND d.region_id = re.region_id
             INNER JOIN TOWN t ON t.name = municipio AND t.depto_id = d.depto_id;
+            
+-- ==================================================================================================
 
+ 
+SELECT table_name, table_rows
+	FROM INFORMATION_SCHEMA.TABLES
+		WHERE TABLE_SCHEMA = 'proyecto2';
+        
+ SELECT COUNT(*) FROM RESULT;
+ 
+ 
+ 

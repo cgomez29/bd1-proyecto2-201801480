@@ -70,7 +70,7 @@
 
 ## Una relación esta en 1FN si y solo si todos los dominios simples subyacentes contienen solo valores atómicos.
 
-
+## Se asigno un id a la tabla de resultado
 
 | RESULTADO    |         |           |             |           |          |             |                 |
 |--------------|---------|-----------|-------------|-----------|----------|-------------|-----------------|
@@ -82,6 +82,7 @@
 | 5            | mujeres | INDIGENAS | 2464        | 5933      | 2565     | 438         | 2930            |
 | 6            | mujeres | INDIGENAS | 2508        | 2773      | 1810     | 654         | 309             |
 
+## Se separo a una tabla nombre y el año de elección.
 
 | **ID_RESULTADO** | **NOMBRE_ELECCION**    | **AÑO_ELECCION**  |
 |------------------|------------------------|-------------------|
@@ -102,6 +103,7 @@
 | 5                | PHT         | Partido Hondureño del trab.  |
 | 6                | PUG         | Partido Union Por Guat.      |
 
+## De igual forma se creo la relacion entre pais, region, departamento y municipio.
 
 | **PAIS** |              |      |
 |----------|--------------|------|
@@ -223,6 +225,7 @@
 | 6             | 2508        | 2773      | 1810     | 654         | 309            | 2        | 1        | 1           | 6            | 4           |
 
 
+## Se separo en una tabla los datos de raza y sexo.
 
 | **ELECCION** |                        |               |
 |--------------|------------------------|---------------|
