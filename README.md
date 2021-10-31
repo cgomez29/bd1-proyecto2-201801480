@@ -105,14 +105,14 @@
 
 ## De igual forma se creo la relacion entre pais, region, departamento y municipio.
 
-| **PAIS** |              |      |
-|----------|--------------|------|
-| PAIS_ID  | PAIS         |      |
-| 1        | EL SALVADOR  |      |
-| 2        | Nicaragua    |      |
-| 3        | HONDURAS     |      |
-| 4        | GUATEMALA    |      |
-|          |              |      |
+| **PAIS** |              |
+|----------|--------------|
+| PAIS_ID  | PAIS         |
+| 1        | EL SALVADOR  |
+| 2        | Nicaragua    |
+| 3        | HONDURAS     |
+| 4        | GUATEMALA    |
+|          |              |
 
 | **REGION** |          |          |
 |------------|----------|----------|
@@ -171,13 +171,13 @@
 | 4           | PUG      | Partido Union Por Guat.      |
 
 
-| **PAIS** |              |          |
-|----------|--------------|----------|
-| PAIS_ID  | PAIS         |          |
-| 1        | EL SALVADOR  |          |
-| 2        | Nicaragua    |          |
-| 3        | HONDURAS     |          |
-| 4        | GUATEMALA    |          |
+| **PAIS** |              |
+|----------|--------------|
+| PAIS_ID  | PAIS         |
+| 1        | EL SALVADOR  |
+| 2        | Nicaragua    |
+| 3        | HONDURAS     |
+| 4        | GUATEMALA    |
 
 | **REGION** |          |          |
 |------------|----------|----------|
@@ -244,14 +244,14 @@
 |             |          |                              |
 
 
-| **PAIS** |              |          |
-|----------|--------------|----------|
-| PAIS_ID  | PAIS         |          |
-| 1        | EL SALVADOR  |          |
-| 2        | Nicaragua    |          |
-| 3        | HONDURAS     |          |
-| 4        | GUATEMALA    |          |
-|          |              |          |
+| **PAIS** |              |
+|----------|--------------|
+| PAIS_ID  | PAIS         |
+| 1        | EL SALVADOR  |
+| 2        | Nicaragua    |
+| 3        | HONDURAS     |
+| 4        | GUATEMALA    |
+|          |              |
 
 | **REGION** |          |          |
 |------------|----------|----------|
@@ -288,15 +288,15 @@
 |               |                        |           |
 
 
-| **SEXO** |          |          |
-|----------|----------|----------|
-| ID_SEXO  | SEXO     |          |
-| 1        | hombres  |          |
-| 2        | mujeres  |          |
-|          |          |          |
+| **SEXO** |          |
+|----------|----------|
+| ID_SEXO  | SEXO     |
+| 1        | hombres  |
+| 2        | mujeres  |
+|          |          |
 
-| **RAZA** |            |          |
-|----------|------------|----------|
-| ID_RAZA  | RAZA       |          |
-| 1        | INDIGENAS  |          |
-|          |            |          |
+| **RAZA** |            |
+|----------|------------|
+| ID_RAZA  | RAZA       |
+| 1        | INDIGENAS  |
+|          |            |
