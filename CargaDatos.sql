@@ -87,14 +87,14 @@ INSERT INTO ELECTION(name, year)
 -- ==================================================================================================
 -- Inserting data to the PARTY table 
 -- ==================================================================================================
-INSERT INTO PARTY(party, name, election_id)
-	SELECT DISTINCT partido, nombre_partido, e.election_id
-		FROM TEMPORARY
-			INNER JOIN ELECTION e ON e.name = nombre_eleccion AND e.year = año_eleccion;
+INSERT INTO PARTY(party, name)
+	SELECT DISTINCT partido, nombre_partido
+		FROM TEMPORARY;
 
 -- ==================================================================================================
 -- Inserting data to the RESULT table 
 -- ==================================================================================================
+
 INSERT INTO RESULT (
     illiterate,   
     alphabet,     
@@ -102,7 +102,7 @@ INSERT INTO RESULT (
     medium_level,
     academic,     
     town_id,       
-	-- election_id,
+	election_id,
     party_id,
     sex_id,       
     race_id      
@@ -113,8 +113,8 @@ INSERT INTO RESULT (
                     te.nivel_medio, 
                     te.universitarios, 
                     town_id,       
-                    -- election_id,  
-                    party_id,
+                    e.election_id,  
+                    p.party_id,
                     s.sex_id,
                     r.race_id 
         FROM TEMPORARY te
@@ -127,27 +127,3 @@ INSERT INTO RESULT (
             INNER JOIN DEPTO d ON d.name = depto AND d.region_id = re.region_id
             INNER JOIN TOWN t ON t.name = municipio AND t.depto_id = d.depto_id;
 
-
-
-
-
-
--- ==================================================================================================
--- Inserting data to the RESULT_DETAIL table 
--- ==================================================================================================
-
--- INSERT INTO RESULT_DETAIL (
---         result_id,       
---         election_id,     
---         town_id          
---     )
---     SELECT DISTINCT rl.result_id,
---                     e.election_id,
---                     t.town_id 
---         FROM TEMPORARY
---             INNER JOIN RESULT rl ON rl.illiterate = analfabetos AND rl.alphabet = alfabetos AND rl.primary_level = primaria
---             INNER JOIN ELECTION e ON e.name = nombre_eleccion AND e.year = año_eleccion
---             INNER JOIN COUNTRY c ON c.name = pais
---             INNER JOIN REGION r ON r.name = region AND r.country_id = c.country_id
---             INNER JOIN DEPTO d ON d.name = depto AND d.region_id = r.region_id
---             INNER JOIN TOWN t ON t.name = municipio AND t.depto_id = d.depto_id;

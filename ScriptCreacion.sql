@@ -114,13 +114,12 @@ CREATE TABLE PARTY(
     party_id          INT NOT NULL AUTO_INCREMENT,
     party             VARCHAR(80) NOT NULL,
     name              VARCHAR(100) NOT NULL,
-    election_id       INT NOT NULL,
     PRIMARY KEY(party_id)
 );
 
-ALTER TABLE PARTY
-    ADD CONSTRAINT party_election_fk FOREIGN KEY(election_id)
-        REFERENCES ELECTION(election_id);
+-- ALTER TABLE PARTY
+--     ADD CONSTRAINT party_election_fk FOREIGN KEY(election_id)
+--         REFERENCES ELECTION(election_id);
 
 -- ==================================================================================================
 -- Creation of the SEX table 
@@ -134,7 +133,7 @@ CREATE TABLE RESULT(
     medium_level    INT NOT NULL,
     academic        INT NOT NULL,
     town_id         INT NOT NULL,
-	-- election_id     INT NOT NULL,
+	election_id     INT NOT NULL,
     party_id 		INT NOT NULL,
     sex_id          INT NOT NULL, 
     race_id         INT NOT NULL,
@@ -150,9 +149,9 @@ ALTER TABLE RESULT
     ADD CONSTRAINT result_race_fk FOREIGN KEY(race_id)
         REFERENCES RACE(race_id);
         
--- ALTER TABLE RESULT
---    ADD CONSTRAINT result_election_fk FOREIGN KEY(election_id)
---        REFERENCES ELECTION(election_id);
+ALTER TABLE RESULT
+    ADD CONSTRAINT result_election_fk FOREIGN KEY(election_id)
+        REFERENCES ELECTION(election_id);
         
 ALTER TABLE RESULT
     ADD CONSTRAINT result_party_fk FOREIGN KEY(party_id)
@@ -161,37 +160,5 @@ ALTER TABLE RESULT
 ALTER TABLE RESULT
     ADD CONSTRAINT result_town_fk FOREIGN KEY(town_id)
         REFERENCES TOWN(town_id);
-
-
--- ==================================================================================================
--- Creation of the SEX table 
--- ==================================================================================================
-
--- CREATE TABLE RESULT_DETAIL(
---     result_detail_id       INT NOT NULL AUTO_INCREMENT,
---     result_id              INT NOT NULL,
---     election_id            INT NOT NULL,
---     town_id                INT NOT NULL,
---     PRIMARY KEY(result_detail_id)
--- );
-
--- -- ALTER TABLE RESULT_DETAIL
--- --     ADD CONSTRAINT result_detail_pk PRIMARY KEY(result_detail_id);
-
-
--- ALTER TABLE RESULT_DETAIL
---     ADD CONSTRAINT result_detail_result_fk FOREIGN KEY(result_id)
---         REFERENCES RESULT(result_id);
-
--- ALTER TABLE RESULT_DETAIL
---     ADD CONSTRAINT result_detail_election_fk FOREIGN KEY(election_id)
---         REFERENCES ELECTION(election_id);
-
-
-
--- ALTER TABLE RESULT_DETAIL
---     ADD CONSTRAINT result_detail_town_fk FOREIGN KEY(town_id)
---         REFERENCES TOWN(town_id);
-
 
 
