@@ -300,3 +300,14 @@
 | ID_RAZA  | RAZA       |
 | 1        | INDIGENAS  |
 |          |            |
+
+
+# Restricciones para utilizar
+## TOWN, DEPTO, REGION, COUNTRY, ELECTION, PARTY el atributo name de cada una de las tablas solo acepta 80 carácteres.
+## SEX el atributo name solo acepta 40 carácteres.
+## RACE el atributo name solo acepta 50 carácteres.
+
+
+# Consideraciones a utilizar
+
+## La entidad RESULT el atributo town_od hace referencia a la llave primaria de TOWN, el atributo party_id hace referencia a la llave primaria de PARTY el atributo election_id hace referencia a la llave primaria de ELECTION.
